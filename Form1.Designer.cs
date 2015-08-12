@@ -29,7 +29,7 @@ namespace FenixTimer
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -39,7 +39,6 @@ namespace FenixTimer
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
-            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.button5 = new System.Windows.Forms.Button();
@@ -121,11 +120,11 @@ namespace FenixTimer
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label4.Location = new System.Drawing.Point(95, 62);
+            this.label4.Location = new System.Drawing.Point(35, 61);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(61, 12);
+            this.label4.Size = new System.Drawing.Size(180, 12);
             this.label4.TabIndex = 8;
-            this.label4.Text = "00:15:00";
+            this.label4.Text = "Beat the drum every hour~";
             // 
             // button4
             // 
@@ -133,14 +132,9 @@ namespace FenixTimer
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(61, 23);
             this.button4.TabIndex = 9;
-            this.button4.Text = "Tomato:0";
+            this.button4.Text = "Beat: 0";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // timer2
-            // 
-            this.timer2.Interval = 1000;
-            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
             // 
             // textBox2
             // 
@@ -186,19 +180,19 @@ namespace FenixTimer
             // chart1
             // 
             this.chart1.BackImageAlignment = System.Windows.Forms.DataVisualization.Charting.ChartImageAlignmentStyle.Center;
-            chartArea2.AxisX.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
-            chartArea2.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
-            chartArea2.AxisX.MajorGrid.Enabled = false;
-            chartArea2.AxisY.Maximum = 1.25D;
-            chartArea2.AxisY.Minimum = 0D;
-            chartArea2.AxisY.Title = "利用率";
-            chartArea2.AxisY2.MajorGrid.LineColor = System.Drawing.Color.LightGray;
-            chartArea2.AxisY2.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
-            chartArea2.AxisY2.Maximum = 10D;
-            chartArea2.AxisY2.Minimum = 0D;
-            chartArea2.AxisY2.Title = "番茄";
-            chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
+            chartArea7.AxisX.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
+            chartArea7.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
+            chartArea7.AxisX.MajorGrid.Enabled = false;
+            chartArea7.AxisY.Maximum = 1.25D;
+            chartArea7.AxisY.Minimum = 0D;
+            chartArea7.AxisY.Title = "利用率";
+            chartArea7.AxisY2.MajorGrid.LineColor = System.Drawing.Color.LightGray;
+            chartArea7.AxisY2.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
+            chartArea7.AxisY2.Maximum = 10D;
+            chartArea7.AxisY2.Minimum = 0D;
+            chartArea7.AxisY2.Title = "节奏点";
+            chartArea7.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea7);
             this.chart1.Location = new System.Drawing.Point(12, 130);
             this.chart1.Name = "chart1";
             this.chart1.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -209,7 +203,7 @@ namespace FenixTimer
             // timer3
             // 
             this.timer3.Enabled = true;
-            this.timer3.Interval = 60000;
+            this.timer3.Interval = 300000;
             this.timer3.Tick += new System.EventHandler(this.timer3_Tick);
             // 
             // checkBox1
@@ -264,7 +258,6 @@ namespace FenixTimer
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Timer timer2;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button button5;

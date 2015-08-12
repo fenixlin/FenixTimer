@@ -12,17 +12,16 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace FenixTimer
 {
-    // Version 0.4
+    // Version 0.5
 
     public partial class Form1 : Form
     {
         int[] totalAvail = new int[1800];
         int[] timeCount = new int[1800];
         int[] outputCount = new int[1800];
-        int[] tomatoCount = new int[1800];
+        int[] beatCount = new int[1800];
         int[] currentmae = { 0, 0, 0 };
         int[] bestmae = { 0, 0, 0 };
-        int tomatoTime = 900;
         int extended = 2;
         bool outputing = false;
         int maeSwitch = 0;
@@ -82,7 +81,7 @@ namespace FenixTimer
             totalAvail[0] = 36000;
             timeCount[0] = 0;
             outputCount[0] = 0;
-            tomatoCount[0] = 0;
+            beatCount[0] = 0;
 
             if (File.Exists("log.txt"))
             {
@@ -113,21 +112,17 @@ namespace FenixTimer
                     timeCount[ts.Days] = Convert.ToInt32(key[1]);
                     totalAvail[ts.Days] = Convert.ToInt32(key[2]);
                     outputCount[ts.Days] = Convert.ToInt32(key[3]);
-                    tomatoCount[ts.Days] = Convert.ToInt32(key[4]);
+                    beatCount[ts.Days] = Convert.ToInt32(key[4]);
 
                     if (ts.Days > n) n = ts.Days;
                 }
                 sr.Close();
 
-                button4.Text = "Tomato:" + tomatoCount[0].ToString();
+                button4.Text = "Beat: " + beatCount[0].ToString();
                 textBox2.Text = timestr(totalAvail[0]);
                 label2.Text = timestr(timeCount[0]);
-                //Console.WriteLine(timeCount[0]);
-                //Console.WriteLine(totalAvail[0]);
-                //Console.WriteLine((DateTime.Now.Date.AddDays(1) - DateTime.Now).TotalSeconds + timeCount[0] - totalAvail[0]);
 
                 updateTitle();
-                //label1.Text = "Avg137: " + timestr(timeCount[1]) + " / " + timestr(avgit(3)) + " / " + timestr(avgit(7));
                 label1.Text = "Best M/A/E: " + timestr_short(bestmae[0]) + " / " + timestr_short(bestmae[1]) + " / " + timestr_short(bestmae[2]);
 
                 chart1.Series.Clear();
@@ -138,7 +133,7 @@ namespace FenixTimer
                 ser1.XAxisType = AxisType.Primary;
                 ser1.YAxisType = AxisType.Primary;
 
-                Series ser2 = new Series("TomatoCount");
+                Series ser2 = new Series("BeatCount");
                 ser2.ChartType = SeriesChartType.Column;
                 ser2.BorderWidth = 2;
                 ser2.XAxisType = AxisType.Primary;
@@ -151,7 +146,6 @@ namespace FenixTimer
                 ser3.XAxisType = AxisType.Primary;
                 ser3.YAxisType = AxisType.Primary;
 
-                //Updated 15/04/15: It was to count time spent on main job.
                 Series ser4 = new Series("PersonalGrowth");
                 ser4.ChartType = SeriesChartType.Spline;
                 ser4.Color = Color.HotPink;
@@ -161,12 +155,11 @@ namespace FenixTimer
 
                 for (int i = n; i >= 1; i--)
                 {
-                    //ser1.Points.AddY((timeCount[i] * 1.0 - totalAvail[i]) / 36000 + 1);
                     if (totalAvail[i]!=0) ser1.Points.AddY(timeCount[i] * 1.0 / totalAvail[i]);
                         else ser1.Points.AddY(0);
-                    ser2.Points.AddY(tomatoCount[i]);
-                    ser3.Points.AddY((timeCount[i] * 1.0) / 21600); //6 hours valid time expected
-                    ser4.Points.AddY((outputCount[i] * 1.0) / 7200); //2 hours PG time expected
+                    ser2.Points.AddY(beatCount[i]);
+                    ser3.Points.AddY((timeCount[i] * 1.0) / 21600);
+                    ser4.Points.AddY((outputCount[i] * 1.0) / 7200);
                 }
                 chart1.Series.Add(ser1);
                 chart1.Series.Add(ser2);
@@ -208,7 +201,7 @@ namespace FenixTimer
             if (extended==0)
             {
                 extended = 1;
-                button3.Text = "＋＋";
+                button3.Text = "↓↓";
                 label2.Visible = true;
                 label4.Visible = true;
                 button1.Text = "Start";
@@ -217,7 +210,7 @@ namespace FenixTimer
                 button2.Text = "Pause";
                 button2.Width = 46;
                 button2.Location = new Point(65, 82);
-                button4.Text = "Tomato:" + tomatoCount[0].ToString();
+                button4.Text = "Beat: " + beatCount[0].ToString();
                 button4.Width = 61;
                 button4.Location = new Point(117, 82);
                 checkBox1.Location = new Point(181, 87);
@@ -230,13 +223,13 @@ namespace FenixTimer
             else if (extended==1)
             {
                 extended = 2;
-                button3.Text = "↓↓";
+                button3.Text = "↑↑";
                 this.Height = 366;
             }
             else if (extended==2)
             {
                 extended = 0;
-                button3.Text = "－－";
+                button3.Text = "＋＋";
                 label2.Visible = false;
                 label4.Visible = false;
                 button1.Text = "S";
@@ -245,7 +238,7 @@ namespace FenixTimer
                 button2.Text = "P";
                 button2.Width = 25;
                 button2.Location = new Point(40, 0);
-                button4.Text = "T:" + tomatoCount[0].ToString();
+                button4.Text = "B:" + beatCount[0].ToString();
                 button4.Width = 35;
                 button4.Location = new Point(70, 0);
                 checkBox1.Location = new Point(110, 5);
@@ -267,7 +260,6 @@ namespace FenixTimer
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             timer1.Enabled = false;
-            timer2.Enabled = false;
             updateMAE();
 
             FileStream fs = new FileStream("log.txt", FileMode.Create);
@@ -277,7 +269,7 @@ namespace FenixTimer
                 bestmae[0].ToString() + " " + bestmae[1].ToString() + " " + bestmae[2].ToString());
             for (int i = 0; i <= n ; i++ )
             {
-                sw.WriteLine(start_dt.AddDays(-i).ToShortDateString().ToString() + " " + timeCount[i] + " " + totalAvail[i] + " " + outputCount[i] + " " + tomatoCount[i]);
+                sw.WriteLine(start_dt.AddDays(-i).ToShortDateString().ToString() + " " + timeCount[i] + " " + totalAvail[i] + " " + outputCount[i] + " " + beatCount[i]);
             }
 
             sw.Close();
@@ -286,29 +278,17 @@ namespace FenixTimer
 
         private void button4_Click(object sender, EventArgs e)
         {
-            timer1.Enabled = true;
-            timer2.Enabled = true;
-            tomatoTime = 900;
-            label4.Text = timestr(tomatoTime);
+            timer1.Enabled = false;
             button4.Enabled = false;
-        }
-
-        private void timer2_Tick(object sender, EventArgs e)
-        {
-            tomatoTime -= 1;
-            if (tomatoTime == 0)
+            beatCount[0] += 1;
+            if (extended > 0)
             {
-                if (MessageBox.Show("Yummy tomato?", "Congratulations!", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
-                {
-                    tomatoCount[0] += 1;
-                    button4.Text = "Tomato:" + tomatoCount[0].ToString();
-                }
-
-                timer2.Enabled = false;
-                button4.Enabled = true;
-                tomatoTime = 900;
+                button4.Text = "Beat: " + beatCount[0].ToString();
             }
-            label4.Text = timestr(tomatoTime);
+            else
+            {
+                button4.Text = "B:" + beatCount[0].ToString();
+            }
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -325,7 +305,8 @@ namespace FenixTimer
 
         private void timer3_Tick(object sender, EventArgs e)
         {
-            updateTitle();
+            updateTitle(); // update title on every 5 minute
+            if (!button4.Enabled) button4.Enabled = true;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
