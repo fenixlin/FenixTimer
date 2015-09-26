@@ -12,16 +12,18 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace FenixTimer
 {
-    // Version 0.5
+    // Version 0.5.2
 
     public partial class Form1 : Form
     {
-        int[] totalAvail = new int[1800];
-        int[] timeCount = new int[1800];
-        int[] outputCount = new int[1800];
-        int[] beatCount = new int[1800];
+        int[] totalAvail = new int[180];
+        int[] timeCount = new int[180];
+        int[] outputCount = new int[180];
+        int[] beatCount = new int[180];
+        int[] hoursCount = new int[25];
         int[] currentmae = { 0, 0, 0 };
         int[] bestmae = { 0, 0, 0 };
+        int[,] dailyAction = new int[180,3];
         int extended = 2;
         bool outputing = false;
         int maeSwitch = 0;
@@ -76,12 +78,16 @@ namespace FenixTimer
         }
 
         public Form1()
-        {
+        {            
             InitializeComponent();
             totalAvail[0] = 36000;
             timeCount[0] = 0;
             outputCount[0] = 0;
             beatCount[0] = 0;
+            for (int i=0; i<3; i++)
+            {
+                dailyAction[0, i] = 0;
+            }
 
             if (File.Exists("log.txt"))
             {
@@ -92,6 +98,13 @@ namespace FenixTimer
                 if ((line = sr.ReadLine()) != null)
                 {
                     String[] key = line.Split(' ');
+                    for (int i = 0; i < 25; i++) {
+                        if (i >= key.Length-1) hoursCount[i] = 0;
+                        else hoursCount[i] = Convert.ToInt32(key[i]);
+                    }
+                }
+                if ((line = sr.ReadLine()) != null) {
+                    String[] key = line.Split(' ');
                     TimeSpan ts = dt - DateTime.Parse(key[0]);
                     if (ts.Days == 0)
                     {
@@ -99,6 +112,7 @@ namespace FenixTimer
                         currentmae[1] = Convert.ToInt32(key[2]);
                         currentmae[2] = Convert.ToInt32(key[3]);
                     }
+                    else hoursCount[24] += 1; // use hoursCount[24] to count valid days (+1 every new day)
                     bestmae[0] = Convert.ToInt32(key[4]);
                     bestmae[1] = Convert.ToInt32(key[5]);
                     bestmae[2] = Convert.ToInt32(key[6]);
@@ -113,6 +127,9 @@ namespace FenixTimer
                     totalAvail[ts.Days] = Convert.ToInt32(key[2]);
                     outputCount[ts.Days] = Convert.ToInt32(key[3]);
                     beatCount[ts.Days] = Convert.ToInt32(key[4]);
+                    dailyAction[ts.Days, 0] = Convert.ToInt32(key[5]);
+                    dailyAction[ts.Days, 1] = Convert.ToInt32(key[6]);
+                    dailyAction[ts.Days, 2] = Convert.ToInt32(key[7]);
 
                     if (ts.Days > n) n = ts.Days;
                 }
@@ -125,6 +142,10 @@ namespace FenixTimer
                 updateTitle();
                 label1.Text = "Best M/A/E: " + timestr_short(bestmae[0]) + " / " + timestr_short(bestmae[1]) + " / " + timestr_short(bestmae[2]);
 
+                if (dailyAction[0, 0]>0) button7.Enabled = false;
+                if (dailyAction[0, 1]>0) button8.Enabled = false;
+                if (dailyAction[0, 2]>0) button9.Enabled = false;
+
                 chart1.Series.Clear();
                 Series ser1 = new Series("Efficiency");
                 ser1.ChartType = SeriesChartType.Spline;
@@ -135,7 +156,7 @@ namespace FenixTimer
 
                 Series ser2 = new Series("BeatCount");
                 ser2.ChartType = SeriesChartType.Column;
-                ser2.BorderWidth = 2;
+                ser2.Color = Color.FromArgb(120,0,100,0); 
                 ser2.XAxisType = AxisType.Primary;
                 ser2.YAxisType = AxisType.Secondary;
 
@@ -165,7 +186,17 @@ namespace FenixTimer
                 chart1.Series.Add(ser2);
                 chart1.Series.Add(ser3);
                 chart1.Series.Add(ser4);
-                
+
+                chart2.Series.Clear();
+                Series ser5 = new Series("AverageSpent");
+                ser5.ChartType = SeriesChartType.Column;
+                ser5.Color = Color.DarkGreen;
+                for (int i = 0; i < 24; i++)
+                {
+                    if (hoursCount[24] > 0) ser5.Points.AddY(hoursCount[i] / hoursCount[24]);
+                    else ser5.Points.AddY(0);
+                }
+                chart2.Series.Add(ser5);
             }
         }
 
@@ -224,7 +255,7 @@ namespace FenixTimer
             {
                 extended = 2;
                 button3.Text = "↑↑";
-                this.Height = 366;
+                this.Height = 500;
             }
             else if (extended==2)
             {
@@ -253,6 +284,7 @@ namespace FenixTimer
         private void timer1_Tick(object sender, EventArgs e)
         {
             timeCount[0] += 1;
+            hoursCount[DateTime.Now.Hour] += 1;
             if (outputing) outputCount[0] += 1;
             label2.Text = timestr(timeCount[0]);
         }
@@ -265,11 +297,16 @@ namespace FenixTimer
             FileStream fs = new FileStream("log.txt", FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
 
+            for (int i = 0; i < 25; i++)
+            {
+                sw.Write(hoursCount[i].ToString() + " ");
+            }
+            sw.WriteLine();
             sw.WriteLine(start_dt.ToShortDateString().ToString() + " " + currentmae[0].ToString() + " " + currentmae[1].ToString() + " " + currentmae[2].ToString() + " " +
                 bestmae[0].ToString() + " " + bestmae[1].ToString() + " " + bestmae[2].ToString());
             for (int i = 0; i <= n ; i++ )
             {
-                sw.WriteLine(start_dt.AddDays(-i).ToShortDateString().ToString() + " " + timeCount[i] + " " + totalAvail[i] + " " + outputCount[i] + " " + beatCount[i]);
+                sw.WriteLine(start_dt.AddDays(-i).ToShortDateString().ToString() + " " + timeCount[i] + " " + totalAvail[i] + " " + outputCount[i] + " " + beatCount[i] + " " + dailyAction[i, 0] + " " + dailyAction[i, 1] + " " + dailyAction[i, 2]);
             }
 
             sw.Close();
@@ -279,6 +316,9 @@ namespace FenixTimer
         private void button4_Click(object sender, EventArgs e)
         {
             timer1.Enabled = false;
+            updateMAE();
+            updateTitle(); 
+
             button4.Enabled = false;
             beatCount[0] += 1;
             if (extended > 0)
@@ -314,6 +354,23 @@ namespace FenixTimer
             outputing = !outputing;
         }
 
+        private void button7_Click(object sender, EventArgs e)
+        {
+            dailyAction[0, 0] = 1;
+            button7.Enabled = false;
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            dailyAction[0, 1] = 1;
+            button8.Enabled = false;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            dailyAction[0, 2] = 1;
+            button9.Enabled = false;
+        }
     }
 }
 
