@@ -1,4 +1,4 @@
-namespace FenixTimer
+﻿namespace FenixTimer
 {
     partial class Form1
     {
@@ -29,8 +29,8 @@ namespace FenixTimer
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -40,8 +40,6 @@ namespace FenixTimer
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -57,7 +55,7 @@ namespace FenixTimer
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 82);
+            this.button1.Location = new System.Drawing.Point(13, 82);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(47, 23);
             this.button1.TabIndex = 0;
@@ -67,17 +65,17 @@ namespace FenixTimer
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(65, 82);
+            this.button2.Location = new System.Drawing.Point(64, 82);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(46, 23);
+            this.button2.Size = new System.Drawing.Size(50, 23);
             this.button2.TabIndex = 1;
-            this.button2.Text = "Pause";
+            this.button2.Text = "Lock";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(197, 82);
+            this.button3.Location = new System.Drawing.Point(198, 82);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(38, 23);
             this.button3.TabIndex = 2;
@@ -103,11 +101,11 @@ namespace FenixTimer
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label3.Location = new System.Drawing.Point(10, 112);
+            this.label3.Location = new System.Drawing.Point(13, 111);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(222, 12);
             this.label3.TabIndex = 5;
-            this.label3.Text = "B/R/P: Effi / Valid / PersonalT";
+            this.label3.Text = "B/R/P: Slay yday / Total / Main";
             // 
             // timer1
             // 
@@ -116,7 +114,7 @@ namespace FenixTimer
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(22, 274);
+            this.label1.Location = new System.Drawing.Point(22, 304);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(210, 17);
             this.label1.TabIndex = 7;
@@ -126,15 +124,17 @@ namespace FenixTimer
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label4.Location = new System.Drawing.Point(59, 62);
+            this.label4.Location = new System.Drawing.Point(64, 61);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(123, 12);
+            this.label4.Size = new System.Drawing.Size(122, 12);
             this.label4.TabIndex = 8;
-            this.label4.Text = "~慢节奏，专注生活~";
+            this.label4.Text = "这是心态稳衡的秘诀";
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(117, 82);
+            this.button4.Font = new System.Drawing.Font("Calibri", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.button4.ForeColor = System.Drawing.Color.Blue;
+            this.button4.Location = new System.Drawing.Point(118, 82);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(61, 23);
             this.button4.TabIndex = 9;
@@ -142,64 +142,43 @@ namespace FenixTimer
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // textBox2
-            // 
-            this.textBox2.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox2.Location = new System.Drawing.Point(117, 292);
-            this.textBox2.Margin = new System.Windows.Forms.Padding(1);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(89, 26);
-            this.textBox2.TabIndex = 10;
-            this.textBox2.Text = "10:00:00";
-            this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(10, 301);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(71, 12);
-            this.label5.TabIndex = 11;
-            this.label5.Text = "Total Time:";
-            // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(89, 292);
+            this.button5.Location = new System.Drawing.Point(12, 130);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(24, 23);
+            this.button5.Size = new System.Drawing.Size(101, 23);
             this.button5.TabIndex = 12;
-            this.button5.Text = "-";
+            this.button5.Text = "TIME--";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(211, 292);
+            this.button6.Location = new System.Drawing.Point(140, 130);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(24, 23);
+            this.button6.Size = new System.Drawing.Size(95, 23);
             this.button6.TabIndex = 12;
-            this.button6.Text = "+";
+            this.button6.Text = "TIME++";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // chart1
             // 
             this.chart1.BackImageAlignment = System.Windows.Forms.DataVisualization.Charting.ChartImageAlignmentStyle.Center;
-            chartArea1.AxisX.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
-            chartArea1.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
-            chartArea1.AxisX.MajorGrid.Enabled = false;
-            chartArea1.AxisY.Maximum = 1.25D;
-            chartArea1.AxisY.Minimum = 0D;
-            chartArea1.AxisY.Title = "利用率";
-            chartArea1.AxisY2.MajorGrid.LineColor = System.Drawing.Color.LightGray;
-            chartArea1.AxisY2.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
-            chartArea1.AxisY2.Maximum = 30D;
-            chartArea1.AxisY2.Minimum = 0D;
-            chartArea1.AxisY2.Title = "节奏点";
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            this.chart1.Location = new System.Drawing.Point(12, 130);
+            chartArea3.AxisX.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.True;
+            chartArea3.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
+            chartArea3.AxisX.MajorGrid.Enabled = false;
+            chartArea3.AxisY.Maximum = 1.25D;
+            chartArea3.AxisY.Minimum = 0D;
+            chartArea3.AxisY.Title = "利用率";
+            chartArea3.AxisY2.MajorGrid.LineColor = System.Drawing.Color.LightGray;
+            chartArea3.AxisY2.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
+            chartArea3.AxisY2.Maximum = 20D;
+            chartArea3.AxisY2.Minimum = 0D;
+            chartArea3.AxisY2.Title = "节奏点";
+            chartArea3.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea3);
+            this.chart1.Location = new System.Drawing.Point(12, 158);
             this.chart1.Name = "chart1";
             this.chart1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.chart1.Size = new System.Drawing.Size(227, 141);
@@ -215,7 +194,7 @@ namespace FenixTimer
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(181, 87);
+            this.checkBox1.Location = new System.Drawing.Point(182, 87);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(15, 14);
             this.checkBox1.TabIndex = 14;
@@ -224,16 +203,16 @@ namespace FenixTimer
             // 
             // chart2
             // 
-            chartArea2.AxisX.Interval = 3D;
-            chartArea2.AxisX.MajorGrid.Interval = 3D;
-            chartArea2.AxisX.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
-            chartArea2.AxisX.MajorTickMark.Interval = 3D;
-            chartArea2.AxisX.Maximum = 24D;
-            chartArea2.AxisX.Minimum = 6D;
-            chartArea2.AxisY.MajorGrid.Enabled = false;
-            chartArea2.AxisY.MajorTickMark.Enabled = false;
-            chartArea2.Name = "ChartArea1";
-            this.chart2.ChartAreas.Add(chartArea2);
+            chartArea4.AxisX.Interval = 3D;
+            chartArea4.AxisX.MajorGrid.Interval = 3D;
+            chartArea4.AxisX.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
+            chartArea4.AxisX.MajorTickMark.Interval = 3D;
+            chartArea4.AxisX.Maximum = 24D;
+            chartArea4.AxisX.Minimum = 6D;
+            chartArea4.AxisY.MajorGrid.Enabled = false;
+            chartArea4.AxisY.MajorTickMark.Enabled = false;
+            chartArea4.Name = "ChartArea1";
+            this.chart2.ChartAreas.Add(chartArea4);
             this.chart2.Location = new System.Drawing.Point(24, 322);
             this.chart2.Name = "chart2";
             this.chart2.Size = new System.Drawing.Size(190, 102);
@@ -286,8 +265,6 @@ namespace FenixTimer
             this.Controls.Add(this.chart1);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label1);
@@ -320,8 +297,6 @@ namespace FenixTimer
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
@@ -333,5 +308,4 @@ namespace FenixTimer
         private System.Windows.Forms.Button button9;
     }
 }
-
 
