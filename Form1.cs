@@ -15,25 +15,23 @@ using Microsoft.Win32;
 namespace FenixTimer
 {
 
+    // Version 0.5
+
     public partial class Form1 : Form
     {
-        int[] totalAvail = new int[180];
-        int[] timeCount = new int[180];
-        int[] outputCount = new int[180];
+        const int beatLimit = 11;
+        const int beatDeviation = 3;
+
+        const double baseProb = 1.0/(25*25); // 计算方法：x天后概率为1，则base是1/x^2。理念：越到后面越难也越要坚持
+        double coefProb = 0;
         int[] beatCount = new int[180];
-        int[] hoursCount = new int[25];
-        int[] todayHoursCount = new int[24];
-        int[] currentmae = { 0, 0, 0 };
-        int[] bestmae = { 0, 0, 0 };
-        int[,] dailyAction = new int[180,3];
+        int[] lockCount = new int[180];
         int extended = 2;
-        bool outputing = false;
         bool locked = false;
-        int maeSwitch = 0;
-        int lastTimeCount = 0;
-        int n = 0;
+        int nDays = 0;
+        int ctnDays = 0;
+        int ctnStat = 0;
         DateTime start_dt = DateTime.Now;
-        Series avgSer, todaySer;
 
         private static class FlashWindow
         {
@@ -74,301 +72,188 @@ namespace FenixTimer
                 return FlashWindowEx(ref fInfo);
             }
         }
+        
+        private double getAvg(int span)
+        {
+            if (nDays <= 0) return 0;
+            double theSum = 0;
+            for (int i=1; i<=Math.Min(nDays, span); i++)
+            {
+                theSum += beatCount[i];
+            }
+            return theSum / Math.Min(nDays, span);
+        }
+
+        private void updateAvg()
+        {
+            label3.Text = String.Format("3/7/14 Avg: {0:F1}/ {1:F1}/ {2:F1}", getAvg(3), getAvg(7), getAvg(14));
+        }
 
         private void updateTitle()
         {
-            if (extended == 0)
+            if (extended == 0 && locked)
             {
-                if (timer1.Enabled)
-                {
-                    this.Text = "Active";
-                }
-                else
-                {
-                    this.Text = "Inactive";
-                }
+                this.Text = "Locked";
             }
             else
             {
-                this.Text = String.Format("{0:0%Atk},{1:0%}/{2:0%}", outputCount[0] * 1.0 / 10800, (timeCount[0] * 1.0 - totalAvail[0]) / 36000 + 1, ((DateTime.Now.Date.AddDays(1) - DateTime.Now).TotalSeconds + timeCount[0] - totalAvail[0]) / 36000 + 1);
+                this.Text = String.Format("Hope Generator");
             }
         }
-
-        private void updateMAE()
+         
+        private double getProb()
         {
-            currentmae[maeSwitch] += timeCount[0] - lastTimeCount;
-            if (currentmae[maeSwitch] > bestmae[maeSwitch])
+            return baseProb * coefProb * coefProb;
+        }
+
+        private void updateCtnLabel()
+        {
+            if (ctnStat>=0)
             {
-                bestmae[maeSwitch] = currentmae[maeSwitch];
+                label5.Text = String.Format("已连续{0}天,目前概率{1:F3}‰", ctnDays, getProb() * 1000);
             }
-            label1.Text = "Best M/A/E: " + timestr_short(bestmae[0]) + " / " + timestr_short(bestmae[1]) + " / " + timestr_short(bestmae[2]);
-            lastTimeCount = timeCount[0];            
-        }
-
-        private void updateChart2()
-        {
-            chart2.Series.Clear();
-            chart2.Series.Add(avgSer);
-            todaySer.Points.Clear();
-            for (int i = 0; i < DateTime.Now.Hour; i++)
+            else
             {
-                todaySer.Points.AddY(todayHoursCount[i]);
+                label5.Text = String.Format("已连续{0}天,目前概率{1:F3}‰", ctnStat, getProb() * 1000);
+            }            
+        }
+
+        private void updateMainLabel()
+        {
+            if (locked)
+            {
+                label2.Text = "Locked";
+                label2.ForeColor = Color.Red;
             }
-            chart2.Series.Add(todaySer);
-        }
-
-
-        private int avgit(int x)
-        {
-            int sum=0;
-            for (int i = 1; i <= x; i++) sum += timeCount[i];
-            return sum/x;
-        }
-
-        private String timestr(int s)
-        {
-            return String.Format("{0:D2}:{1:D2}:{2:D2}", s / 3600, s / 60 % 60, s % 60);
-        }
-
-        private String timestr_short(int s)
-        {
-            return String.Format("{0:D2}:{1:D2}", s / 3600, s / 60 % 60);
+            else
+            {
+                label2.Text = String.Format("{0} / {1}", beatCount[0], beatLimit);
+                label2.ForeColor = Color.Black;
+            }
         }
 
         public Form1()
         {            
             InitializeComponent();
-            totalAvail[0] = 36000;
-            timeCount[0] = 0;
-            outputCount[0] = 0;
             beatCount[0] = 0;
-            for (int i=0; i<3; i++)
-            {
-                dailyAction[0, i] = 0;
-            }
 
             if (File.Exists("log.txt"))
             {
                 StreamReader sr = new StreamReader("log.txt");
                 DateTime dt = DateTime.Now;
-                String line;                
+                String line;               
+                 
+                if ((line = sr.ReadLine()) != null)
+                {
+                    String[] key = line.Split(' ');
+                    ctnDays = Convert.ToInt32(key[0]);
+                    ctnStat = Convert.ToInt32(key[1]);
+                    coefProb = Convert.ToDouble(key[2]);
+                }
+                if ((line = sr.ReadLine()) != null)
+                {
+                    String[] key = line.Split(' ');
 
-                if ((line = sr.ReadLine()) != null)
-                {
-                    String[] key = line.Split(' ');
-                    for (int i = 0; i < 25; i++) {
-                        if (i >= key.Length-1) hoursCount[i] = 0;
-                        else hoursCount[i] = Convert.ToInt32(key[i]);
-                    }
-                }
-                if ((line = sr.ReadLine()) != null)
-                {
-                    String[] key = line.Split(' ');
-                    for (int i = 0; i < 24; i++)
-                    {
-                        if (i >= key.Length - 1) todayHoursCount[i] = 0;
-                        else todayHoursCount[i] = Convert.ToInt32(key[i]);
-                    }
-                }
-                if ((line = sr.ReadLine()) != null) {
-                    String[] key = line.Split(' ');
                     TimeSpan ts = dt - DateTime.Parse(key[0]);
-                    if (ts.Days == 0)
+                    beatCount[ts.Days] = Convert.ToInt32(key[1]);
+                    lockCount[ts.Days] = Convert.ToInt32(key[2]);
+                    if (ts.Days>0 && beatCount[1] < beatLimit)
                     {
-                        currentmae[0] = Convert.ToInt32(key[1]);
-                        currentmae[1] = Convert.ToInt32(key[2]);
-                        currentmae[2] = Convert.ToInt32(key[3]);
+                        ctnStat = Math.Max(ctnStat - 1, -1);
+                        ctnDays = 0;
+                        if (ctnStat < 0)
+                        {
+                            if (coefProb - 1 > 0) coefProb -= 1;
+                            else coefProb = 0;
+                        }
                     }
-                    else
-                    {
-                        hoursCount[24] += 1; // use hoursCount[24] to count valid days (+1 every new day)
-                        todayHoursCount = Enumerable.Repeat(0, 24).ToArray();
-                    }
-                    bestmae[0] = Convert.ToInt32(key[4]);
-                    bestmae[1] = Convert.ToInt32(key[5]);
-                    bestmae[2] = Convert.ToInt32(key[6]);
                 }
-
                 while ((line = sr.ReadLine())!=null)
                 {
                     String[] key = line.Split(' ');
                     
                     TimeSpan ts = dt - DateTime.Parse(key[0]);
-                    timeCount[ts.Days] = Convert.ToInt32(key[1]);
-                    totalAvail[ts.Days] = Convert.ToInt32(key[2]);
-                    outputCount[ts.Days] = Convert.ToInt32(key[3]);
-                    beatCount[ts.Days] = Convert.ToInt32(key[4]);
-                    dailyAction[ts.Days, 0] = Convert.ToInt32(key[5]);
-                    dailyAction[ts.Days, 1] = Convert.ToInt32(key[6]);
-                    dailyAction[ts.Days, 2] = Convert.ToInt32(key[7]);
+                    beatCount[ts.Days] = Convert.ToInt32(key[1]);
+                    lockCount[ts.Days] = Convert.ToInt32(key[2]);
 
-                    if (ts.Days > n) n = ts.Days;
+                    if (ts.Days > nDays) nDays = ts.Days;
                 }
                 sr.Close();
 
-                button4.Text = "Beat: " + beatCount[0].ToString();
-                label2.Text = timestr(timeCount[0]);
-
                 updateTitle();
-                label1.Text = "Best M/A/E: " + timestr_short(bestmae[0]) + " / " + timestr_short(bestmae[1]) + " / " + timestr_short(bestmae[2]);
-
-                if (dailyAction[0, 0]>0) button7.Enabled = false;
-                if (dailyAction[0, 1]>0) button8.Enabled = false;
-                if (dailyAction[0, 2]>0) button9.Enabled = false;
+                updateAvg();
+                updateMainLabel();
+                updateCtnLabel();
+                if (beatCount[0] >= beatLimit)
+                {
+                    button5.Enabled = true;
+                    button5.ForeColor = Color.Red;
+                }
+                else
+                {
+                    button5.Enabled = false;
+                }
 
                 chart1.Series.Clear();
-                Series ser1 = new Series("Slayed");
+                Series ser1 = new Series("Expectation");
                 ser1.ChartType = SeriesChartType.Spline;
-                ser1.Color = Color.Blue;
+                ser1.Color = Color.Red;
                 ser1.BorderWidth = 2;
-                ser1.XAxisType = AxisType.Primary;
-                ser1.YAxisType = AxisType.Secondary;
-                int slayedCount = 0;
 
                 Series ser2 = new Series("BeatCount");
                 ser2.ChartType = SeriesChartType.Column;
-                ser2.Color = Color.FromArgb(120,0,100,0); 
-                ser2.XAxisType = AxisType.Primary;
-                ser2.YAxisType = AxisType.Secondary;
+                ser2.Color = Color.FromArgb(200,0xFF,0xB0,0x00);
+                //ser2.CustomProperties = "PixelPointWidth = 15";
 
-                Series ser3 = new Series("ValidTime");
-                ser3.ChartType = SeriesChartType.Spline;
-                ser3.Color = Color.Red;
-                ser3.BorderWidth = 3;
-                ser3.XAxisType = AxisType.Primary;
-                ser3.YAxisType = AxisType.Primary;
+                Series ser3 = new Series("LockCount");
+                ser3.ChartType = SeriesChartType.Column;                
+                ser3.Color = Color.FromArgb(200, 0x00, 0x00, 0x00);
+                //ser3.CustomProperties = "PixelPointWidth = 15";
 
-                Series ser4 = new Series("PersonalGrowth");
-                ser4.ChartType = SeriesChartType.Spline;
-                ser4.Color = Color.HotPink;
-                ser4.BorderWidth = 3;
-                ser4.XAxisType = AxisType.Primary;
-                ser4.YAxisType = AxisType.Primary;
-
-                for (int i = n; i >= 1; i--)
+                for (int i = 14; i >= 1; i--)
                 {
-                    if (i < n && timeCount[i] > timeCount[i + 1]) slayedCount += 1;
-                    ser1.Points.AddY(slayedCount);
-                    ser2.Points.AddY(beatCount[i]);
-                    ser3.Points.AddY((timeCount[i] * 1.0) / 21600);
-                    ser4.Points.AddY((outputCount[i] * 1.0) / 7200);
+                    ser1.Points.AddXY(-i, beatLimit);
                 }
-                chart1.Series.Add(ser1);
+                for (int i = Math.Min(14, nDays); i >= 1; i--)
+                {       
+                    ser2.Points.AddXY(-i, beatCount[i]);
+                    ser3.Points.AddXY(-i, lockCount[i]);
+                }                
                 chart1.Series.Add(ser2);
                 chart1.Series.Add(ser3);
-                chart1.Series.Add(ser4);
+                chart1.Series.Add(ser1);
 
-                avgSer = new Series("AverageSpent");
-                avgSer.ChartType = SeriesChartType.Column;
-                avgSer.Color = Color.DarkGreen;
-                for (int i = 0; i < 24; i++)
-                {
-                    if (hoursCount[24] > 0) avgSer.Points.AddY(hoursCount[i] / hoursCount[24]);
-                    else avgSer.Points.AddY(0);
-                }
-
-                todaySer = new Series("TodaySpent");
-                todaySer.ChartType = SeriesChartType.Column;
-                todaySer.Color = Color.FromArgb(200, 0, 180, 180);
-
-                updateChart2();
             }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            timer1.Enabled = false;
-            updateMAE();
-
             FileStream fs = new FileStream("log.txt", FileMode.Create);
             StreamWriter sw = new StreamWriter(fs);
-
-            for (int i = 0; i < 25; i++)
+                
+            sw.WriteLine(ctnDays.ToString() + " " + ctnStat.ToString() + " " + coefProb.ToString());
+            for (int i = 0; i <= nDays; i++)
             {
-                sw.Write(hoursCount[i].ToString() + " ");
-            }
-            sw.WriteLine();     
-            for (int i = 0; i < 24; i++)
-            {
-                sw.Write(todayHoursCount[i].ToString() + " ");
-            }
-            sw.WriteLine();
-            sw.WriteLine(start_dt.ToShortDateString().ToString() + " " + currentmae[0].ToString() + " " + currentmae[1].ToString() + " " + currentmae[2].ToString() + " " +
-                bestmae[0].ToString() + " " + bestmae[1].ToString() + " " + bestmae[2].ToString());
-            for (int i = 0; i <= n; i++)
-            {
-                sw.WriteLine(start_dt.AddDays(-i).ToShortDateString().ToString() + " " + timeCount[i] + " " + totalAvail[i] + " " + outputCount[i] + " " + beatCount[i] + " " + dailyAction[i, 0] + " " + dailyAction[i, 1] + " " + dailyAction[i, 2]);
+                sw.WriteLine(start_dt.AddDays(-i).ToShortDateString().ToString() + " " + beatCount[i] + " " + lockCount[i]);
             }
 
             sw.Close();
             fs.Close();
         }
-
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            timeCount[0] += 1;
-            hoursCount[DateTime.Now.Hour] += 1;
-            todayHoursCount[DateTime.Now.Hour] += 1;
-            if (outputing) outputCount[0] += 1;
-            label2.Text = timestr(timeCount[0]);
-        }
-
+        
         private void timer3_Tick(object sender, EventArgs e)
         {
-            updateTitle(); // update title on every 5 minute
-            updateChart2();
-            if (!button4.Enabled) button4.Enabled = true;
+            // frequency: 5 min
             int nowmin = int.Parse(DateTime.Now.Minute.ToString());
-            if (nowmin>=0 && nowmin<5 || nowmin>=30 && nowmin<35) FlashWindow.FlashWindowEx(this);
-        }
-        
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (!timer1.Enabled)
-            {
-                timer1.Enabled = true;
-                button1.Text = "Pause";
-                lastTimeCount = timeCount[0];
-                updateTitle();
-                DateTime dt = DateTime.Now;
-                if (dt.Hour < 12)
-                {
-                    maeSwitch = 0;
-                }
-                else if (dt.Hour < 18)
-                {
-                    maeSwitch = 1;
-                }
-                else
-                {
-                    maeSwitch = 2;
-                }
-            }
-            else
-            {
-                timer1.Enabled = false;
-                button1.Text = "Start";
-                updateMAE();
-                updateTitle();
-            }
+            if (nowmin>=0 && nowmin<5 || nowmin>=30 && nowmin<35) FlashWindow.FlashWindowEx(this); // send warnings on specific time
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (!locked)
-            {
-                locked = true;
-                label2.Text = "Locked";
-                label2.ForeColor = Color.Red;
-                button2.Text = "Unlock";
-            }
-            else
-            {
-                locked = false;
-                label2.Text = timestr(timeCount[0]);
-                label2.ForeColor = Color.Black;
-                button2.Text = "Lock";
-            }
+            locked = !locked;
+            button2.Text = locked?(extended > 0 ? "Unlock" : "U") : (extended > 0 ? "Lock" : "L");
+            updateMainLabel();
+            updateTitle();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -376,47 +261,40 @@ namespace FenixTimer
             if (extended==0)
             {
                 extended = 1;
-                button3.Text = "↓↓";
+                button3.Text = "↓";
                 label2.Visible = true;
                 label4.Visible = true;
-                button1.Text = timer1.Enabled? "Pause" : "Start";
-                button1.Width = 47;
-                button1.Location = new Point(13, 82);
                 button2.Text = locked? "Unlock" : "Lock";
                 button2.Width = 50;
-                button2.Location = new Point(64, 82);
-                button4.Text = "Beat: " + beatCount[0].ToString();
+                button2.Location = new Point(64, 61);
+                button4.Text = "Beat";
                 button4.Width = 61;
-                button4.Location = new Point(118, 82);
-                checkBox1.Location = new Point(182, 87);
-                button3.Location = new Point(198, 82);
+                button4.Location = new Point(123, 61);
+                button3.Width = 22;
+                button3.Location = new Point(215, 61);
                 updateTitle(); 
                 this.Opacity = 1;
                 this.Width = 266;
-                this.Height = 153;
+                this.Height = 130;
             }
             else if (extended==1)
             {
                 extended = 2;
-                button3.Text = "↑↑";
-                this.Height = 500;
+                button3.Text = "↑";
+                this.Height = 369;
             }
             else if (extended==2)
             {
                 extended = 0;
-                button3.Text = "＋＋";
+                button3.Text = "＋";
                 label2.Visible = false;
                 label4.Visible = false;
-                button1.Text = "S";
-                button1.Width = 25;
-                button1.Location = new Point(10, 0);
-                button2.Text = "P";
+                button2.Text = locked? "U" : "L";
                 button2.Width = 25;
                 button2.Location = new Point(40, 0);
-                button4.Text = "B:" + beatCount[0].ToString();
+                button4.Text = "B";
                 button4.Width = 35;
                 button4.Location = new Point(70, 0);
-                checkBox1.Location = new Point(110, 5);
                 button3.Location = new Point(130, 0);
                 updateTitle();
                 this.Opacity = 0.3;
@@ -427,55 +305,58 @@ namespace FenixTimer
 
         private void button4_Click(object sender, EventArgs e)
         {
-            timer1.Enabled = false;
-            updateMAE();
-            updateTitle(); 
-
-            button4.Enabled = false;
             beatCount[0] += 1;
+            if (locked)
+            {
+                lockCount[0] += 1;
+            }
+            if (beatCount[0] == beatLimit+beatDeviation || beatCount[0] == beatLimit-beatDeviation)
+            {
+                coefProb += 0.4;
+                updateCtnLabel();
+            }
+            if (beatCount[0] == beatLimit)
+            {
+                coefProb += 0.4;
+                ctnStat = 1;
+                ctnDays += 1;
+                updateCtnLabel();
+                button5.Enabled = true;
+                button5.ForeColor = Color.Red;
+            }
+            updateMainLabel();
             if (extended > 0)
             {
-                button4.Text = "Beat: " + beatCount[0].ToString();
+                button4.Text = "Beat";
             }
             else
             {
-                button4.Text = "B:" + beatCount[0].ToString();
+                button4.Text = "B";
             }
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            timeCount[0] -= 900;
-            label2.Text = timestr(timeCount[0]);
+            Random rnd = new Random();
+            int top = 10000000;
+            int limit = Convert.ToInt32(Math.Ceiling(getProb() * top));
+            int dice = rnd.Next(top);
+            if (dice<limit)
+            {
+                MessageBox.Show(String.Format("抽中了抽中了！！！Dice result {0} (中奖率{1}/{2})", dice, limit, top), "Prize Drawing Result", MessageBoxButtons.OK);
+            }
+            else
+            {
+                MessageBox.Show(String.Format("明天也要继续加油呐！Dice result {0} (中奖率{1}/{2})", dice, limit, top), "Prize Drawing Result", MessageBoxButtons.OK);
+            }
+            button5.Enabled = false;
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            timeCount[0] += 900;
-            label2.Text = timestr(timeCount[0]);
-        }
-
-        private void button7_Click(object sender, EventArgs e)
-        {
-            dailyAction[0, 0] = 1;
-            button7.Enabled = false;
-        }
-
-        private void button8_Click(object sender, EventArgs e)
-        {
-            dailyAction[0, 1] = 1;
-            button8.Enabled = false;
-        }
-
-        private void button9_Click(object sender, EventArgs e)
-        {
-            dailyAction[0, 2] = 1;
-            button9.Enabled = false;
-        }
-
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            outputing = !outputing;
+            button1.Enabled = false;
+            coefProb += 0.2;
+            updateCtnLabel();
         }
     }
 }
